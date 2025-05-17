@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Manga Downloader</title>
+	<style>
+		/* Base reset */
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+		}
+
+		body {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			height: 100vh;
+			background: linear-gradient(135deg, #ece9e6, #ffffff);
+		}
+
+		.form-container {
+			background: #fff;
+			padding: 2rem;
+			border-radius: 12px;
+			box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+			width: 320px;
+			text-align: center;
+		}
+
+		.form-container h1 {
+			margin-bottom: 1rem;
+			font-size: 1.5rem;
+			color: #333;
+		}
+
+		.form-group {
+			margin-bottom: 1rem;
+			text-align: left;
+		}
+
+		.form-group label {
+			display: block;
+			font-size: 0.9rem;
+			color: #555;
+			margin-bottom: 0.5rem;
+		}
+
+		.form-group input {
+			width: 100%;
+			padding: 0.5rem;
+			font-size: 1rem;
+			border: 1px solid #ccc;
+			border-radius: 6px;
+			transition: border-color 0.3s;
+		}
+
+		.form-group input:focus {
+			outline: none;
+			border-color: #007bff;
+		}
+
+		button {
+			width: 100%;
+			padding: 0.75rem;
+			font-size: 1rem;
+			border: none;
+			border-radius: 6px;
+			background-color: #007bff;
+			color: #fff;
+			cursor: pointer;
+			transition: background-color 0.3s;
+		}
+
+		button:disabled {
+			background-color: #6c757d;
+			cursor: not-allowed;
+		}
+
+		button:hover:not(:disabled) {
+			background-color: #0056b3;
+		}
+
+		#loader {
+			display: none;
+			margin: 1rem auto 0;
+		}
+
+		#loader img {
+			width: 40px;
+			height: 40px;
+		}
+
+		.message {
+			margin-top: 1rem;
+			font-size: 0.9rem;
+			color: #28a745;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="form-container">
+		<h1>Download Manga</h1>
+		<form id="mangaForm">
+			<div class="form-group">
+				<label for="minChapter">Min Chapter</label>
+				<input type="text" id="minChapter" name="minChapter" required min="1">
+			</div>
+			<div class="form-group">
+				<label for="maxChapter">Max Chapter</label>
+				<input type="text" id="maxChapter" name="maxChapter" required min="1">
+			</div>
+			<div class="form-group">
+				<label for="mangaUrl">Manga URL</label>
+				<input type="url" id="mangaUrl" name="url" required
+					placeholder="https://example.com/manga">
+			</div>
+			<button type="submit" id="submitBtn">Submit</button>
+		</form>
+		<div id="loader">
+			<img src="https://cdn.dribbble.com/userupload/42047401/file/original-1ede16e9804f9c5398e6e710890a95fb.gif"
+				alt="Loading..." />
+		</div>
+		<div class="message" id="message"></div>
+	</div>
+	<script>
+		document.getElementById('mangaForm').addEventListener('submit', async function (e) {
+			e.preventDefault();
+			const submitBtn = document.getElementById('submitBtn');
+			const loader = document.getElementById('loader');
+			const message = document.getElementById('message');
+
+			// Gather form data
+			const minChapter = document.getElementById('minChapter').value;
+			const maxChapter = document.getElementById('maxChapter').value;
+			const url = document.getElementById('mangaUrl').value;
+
+			// Show loading
+			submitBtn.disabled = true;
+			loader.style.display = 'block';
+			message.textContent = '';
+
+			try {
+				const response = await fetch('http://backend:8080/manga', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({minChapter, maxChapter, url})
+				});
+				const result = await response.json();
+
+				if (response.ok) {
+					message.style.color = '#28a745';
+					message.textContent = 'Download started successfully!';
+				} else {
+					message.style.color = '#dc3545';
+					message.textContent = result.error || 'Something went wrong.';
+				}
+			} catch (err) {
+				message.style.color = '#dc3545';
+				message.textContent = 'Network error. Please try again.';
+			} finally {
+				loader.style.display = 'none';
+				submitBtn.disabled = false;
+			}
+		});
+	</script>
+</body>
+
+</html>

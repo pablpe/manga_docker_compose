@@ -1,0 +1,19 @@
+
+services:
+  backend:
+    image: my-go-app
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./backend/outputs:/app/outputs
+
+  frontend:
+    image: my-nginx-static
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:80"
